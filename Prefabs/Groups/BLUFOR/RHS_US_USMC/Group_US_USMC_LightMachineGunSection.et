@@ -1,0 +1,17 @@
+SCR_AIGroup : "{C6C132B7B4E24BF1}Prefabs/Groups/BLUFOR/RHS_US_USMC/Group_US_USMC_Base.et" {
+ ID "0000000000000001"
+ components {
+  SCR_EditableGroupComponent "{50D291F6C83FA532}" {
+   m_UIInfo SCR_EditableGroupUIInfo "{5298E609432D192D}" {
+    m_EntityBudgetCost {
+     SCR_EntityBudgetValue "{604482963251834C}" {
+      m_Value 300
+     }
+     SCR_EntityBudgetValue "{609AE1834A64CEC1}" {
+      m_Value 2
+     }
+    }
+   }
+  }
+ }
+}
