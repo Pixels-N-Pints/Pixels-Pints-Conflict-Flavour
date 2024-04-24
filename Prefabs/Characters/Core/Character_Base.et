@@ -1,0 +1,13 @@
+SCR_ChimeraCharacter {
+ ID "520EC961A090B1EE"
+ components {
+  ActionsManagerComponent "{520EA1D2F659CE02}" {
+   additionalActions {
+    DAD_AttackAction "{61215DF4BA4F60BA}" {
+     ParentContextList {
+     }
+    }
+   }
+  }
+ }
+}

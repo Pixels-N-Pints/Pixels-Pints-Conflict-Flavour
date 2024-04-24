@@ -1,0 +1,8 @@
+SCR_AIGroup {
+ ID "DAD0DAD000000001"
+ components {
+  DAD_AttackComponent "{61215DF296AE1CEF}" {
+   Enabled 0
+  }
+ }
+}
