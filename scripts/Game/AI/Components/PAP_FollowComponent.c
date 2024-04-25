@@ -4,6 +4,7 @@ modded class DAD_FollowComponent
 	const protected string GETIN_WP_PATTERN = "Waypoint_GetIn";
 	const protected string WAIT_WP_PATTERN = "Waypoint_Wait";
 	
+	private int m_Semaphore = 1;
 	
 	void ResetWaypoints()
 	{
@@ -11,8 +12,28 @@ modded class DAD_FollowComponent
 		if (!ai) return;
 		while (ai.GetCurrentWaypoint()) 
 		{
-			ai.CompleteWaypoint(ai.GetCurrentWaypoint());
+			ai.RemoveWaypointAt(0);
 		}
+	}
+	
+	override void Follow(SCR_ChimeraCharacter char)
+	{
+		RplComponent rplC = RplComponent.Cast(GetOwner().FindComponent(RplComponent));
+		if (!rplC.IsOwner()) return;
+
+		Resource wpRes = Resource.Load(m_WaypointType);
+		SCR_EntityWaypoint followWaypoint = SCR_EntityWaypoint.Cast(SpawnHelpers.SpawnEntity(wpRes, char.GetOrigin()));
+
+		ResetWaypoints();
+
+		m_User = SCR_ChimeraCharacter.Cast(char);
+		followWaypoint.SetEntity(m_User);
+
+		AIGroup ai = GetAI();
+		if (!ai) return;
+		ai.AddWaypointAt(followWaypoint, 0);
+
+		Update();
 	}
 	
 	override void StopFollowing()
@@ -59,24 +80,43 @@ modded class DAD_FollowComponent
 		return false;
 	}
 	
+	bool SemaphoreWait()
+	{
+		m_Semaphore--;
+		return m_Semaphore >= 0;
+	}
+	
+	void SemaphoreRelease()
+	{
+		m_Semaphore++;
+	}
+	
 	override void UpdateIsFollowing()
 	{
-		AIGroup aiGroup = GetAI();
 		
+			
+		AIGroup aiGroup = GetAI();
+			
 		if (!aiGroup)
 		{	
 			Print("PAP_FollowComponent:UpdateIsFollowing() | Ai group not found");
 			return;
 		}
 		
+		bool canAccess = SemaphoreWait();
+		if (!canAccess) return;
+		
 		bool isFollowing = IsFollowing();
 		ref array<AIAgent> agents = {};
 		aiGroup.GetAgents(agents);
+		
 		foreach (AIAgent agent : agents)
 		{
 			SCR_ChimeraCharacter char = SCR_ChimeraCharacter.Cast(agent.GetControlledEntity());
 			char.SetIsFollowing(isFollowing);
 		}
+		
+		SemaphoreRelease();
 	}
 	
 	override void Update() {
@@ -84,9 +124,9 @@ modded class DAD_FollowComponent
 				
 		UpdateIsFollowing();
 
-		if (!IsFollowing())
+		if (!m_User || !IsFollowing())
 		{
-			Print("PAP_FollowComponent:Update() | No units following... ending queue");
+			Print("PAP_FollowComponent:Update() | No units following or nobody to folow... ending queue");
 			return;
 		}
 			
