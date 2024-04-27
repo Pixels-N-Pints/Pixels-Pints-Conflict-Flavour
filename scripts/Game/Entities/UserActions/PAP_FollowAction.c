@@ -18,7 +18,7 @@ modded class DAD_FollowAction {
 		SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(user);
 		
 		if (!owner.GetFaction().IsFactionFriendly(player.GetFaction())) return false;
-		if (!owner.FindComponent(AIControlComponent)) return false;
+		if (owner.GetID() == player.GetID()) return false;
 		// TODO: fix
 		/*
 		switch (SCR_CharacterRankComponent.GetCharacterRank(user)) {

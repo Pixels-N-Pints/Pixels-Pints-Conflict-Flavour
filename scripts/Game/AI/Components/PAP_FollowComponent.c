@@ -5,15 +5,56 @@ modded class DAD_FollowComponent
 	const protected string WAIT_WP_PATTERN = "Waypoint_Wait";
 	
 	private int m_Semaphore = 1;
+	private int m_delay = 2;
+	
+	array<AIWaypoint> GetWaypoints(AIGroup aiGroup)
+	{
+		if (!aiGroup) return null;
+		array<AIWaypoint> waypoints = {};
+		aiGroup.GetWaypoints(waypoints);
+		return waypoints;
+	}
+	
+	void ResetFormation()
+	{
+		AIGroup ai = GetAI();
+		if (!ai) return;	
+		
+		AIFormationComponent formationComponent = ai.GetFormationComponent();
+		
+		if (formationComponent)
+		{
+			Print("PAP_FollowComponent:ResetFormation() | Resetting displacement...");
+			formationComponent.SetFormationDisplacement(0);
+		}
+			
+	}
 	
 	void ResetWaypoints()
 	{
 		AIGroup ai = GetAI();
 		if (!ai) return;
-		while (ai.GetCurrentWaypoint()) 
+		
+		array<AIWaypoint> currentWaypoints = {};
+		ai.GetWaypoints(currentWaypoints);
+		foreach (AIWaypoint currentwp : currentWaypoints)
 		{
-			ai.RemoveWaypointAt(0);
+			ai.RemoveWaypoint(currentwp);
 		}
+		
+		ResetFormation();
+		
+	}
+	
+	void AddFollowWaypoint()
+	{
+		AIGroup ai = GetAI();
+		if (!ai) return;
+		Resource wpRes = Resource.Load(m_WaypointType);
+		SCR_EntityWaypoint followWaypoint = SCR_EntityWaypoint.Cast(SpawnHelpers.SpawnEntity(wpRes, m_User.GetOrigin()));
+		followWaypoint.SetEntity(m_User);
+		ai.AddWaypointAt(followWaypoint, 0);
+		
 	}
 	
 	override void Follow(SCR_ChimeraCharacter char)
@@ -21,18 +62,11 @@ modded class DAD_FollowComponent
 		RplComponent rplC = RplComponent.Cast(GetOwner().FindComponent(RplComponent));
 		if (!rplC.IsOwner()) return;
 
-		Resource wpRes = Resource.Load(m_WaypointType);
-		SCR_EntityWaypoint followWaypoint = SCR_EntityWaypoint.Cast(SpawnHelpers.SpawnEntity(wpRes, char.GetOrigin()));
-
 		ResetWaypoints();
-
+		
 		m_User = SCR_ChimeraCharacter.Cast(char);
-		followWaypoint.SetEntity(m_User);
 
-		AIGroup ai = GetAI();
-		if (!ai) return;
-		ai.AddWaypointAt(followWaypoint, 0);
-
+		AddFollowWaypoint();
 		Update();
 	}
 	
@@ -60,18 +94,18 @@ modded class DAD_FollowComponent
 			return false;
 		} 
 		
-		ref array<AIWaypoint> aiWaypoints = {};
-		aiGroup.GetWaypoints(aiWaypoints);
+		array<AIWaypoint> aiWaypoints = GetWaypoints(aiGroup);
 		
 		if (!aiWaypoints || aiWaypoints.IsEmpty()) return false;
 		else
 		{
+			Print("PAP_FollowComponent:IsFollowing() | AI group waypoints:");
+			Print(aiWaypoints);
 			foreach (AIWaypoint wp : aiWaypoints)
 			{
 				EntityPrefabData prefab = wp.GetPrefabData();
 				if (prefab && prefab.GetPrefabName().Contains(FOLLOW_WP_PATTERN))
 				{
-					Print("PAP_FollowComponent:IsFollowing() | At least one unit is still following");
 					return true;
 				} 
 			}
@@ -121,6 +155,7 @@ modded class DAD_FollowComponent
 	
 	override void Update() {
 		Print("PAP_FollowComponent:Update() | Updating...");
+		m_delay = 2;
 				
 		UpdateIsFollowing();
 
@@ -166,6 +201,8 @@ modded class DAD_FollowComponent
 				if (!ai.GetCurrentWaypoint().GetPrefabData().GetPrefabName().Contains(GETIN_WP_PATTERN) &&
 				 	!ai.GetCurrentWaypoint().GetPrefabData().GetPrefabName().Contains(WAIT_WP_PATTERN))
 				{
+					ResetFormation();
+					
 					AIWaypoint getInWaypoint = AIWaypoint.Cast(SpawnHelpers.SpawnEntity(
 						Resource.Load("{0A2A37B4A56D74DF}PrefabsEditable/Auto/AI/Waypoints/E_AIWaypoint_GetInNearest.et"),
 						playerOrigin
@@ -183,28 +220,35 @@ modded class DAD_FollowComponent
 		else
 		{
 			Print("PAP_FollowComponent:Update() | User not in a vehicle");
-			while (ai.GetCurrentWaypoint().GetPrefabData().GetPrefabName().Contains(GETIN_WP_PATTERN))
+			bool groupIsOutOfVehicle = false;
+			foreach (AIAgent a: agents)
 			{
-				Print("PAP_FollowComponent:Update() | Removing Waypoint_GetIn waypoint");
-				ai.RemoveWaypointAt(0);
+				ChimeraCharacter character = ChimeraCharacter.Cast(a.GetControlledEntity());
+				if (character && !character.IsInVehicle())
+				{
+					// Print("PAP_FollowComponent:Update() | At least one follower is disembarked!");
+					groupIsOutOfVehicle = true;
+					break;
+				}
 			}
-			
-			while (ai.GetCurrentWaypoint().GetPrefabData().GetPrefabName().Contains(WAIT_WP_PATTERN))
+			if (!groupIsOutOfVehicle)
 			{
-				Print("PAP_FollowComponent:Update() | Removing Waypoint_Wait waypoint");
-				ai.RemoveWaypointAt(0);
+				ResetWaypoints();
+				AddFollowWaypoint();
+				m_delay = 5;
 			}
 		}
 		
+		
 		QueueUpdate();
-
 	}
 	
 	
 	
+
 	void QueueUpdate()
 	{
-		GetGame().GetCallqueue().CallLater(Update, 2 * 1000, false);
+		GetGame().GetCallqueue().CallLater(Update, m_delay * 1000, false);
 	}
 	
 }
