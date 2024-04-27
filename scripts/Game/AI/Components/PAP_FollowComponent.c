@@ -37,9 +37,10 @@ modded class DAD_FollowComponent
 		
 		array<AIWaypoint> currentWaypoints = {};
 		ai.GetWaypoints(currentWaypoints);
+		
 		foreach (AIWaypoint currentwp : currentWaypoints)
 		{
-			ai.RemoveWaypoint(currentwp);
+			ai.CompleteWaypoint(currentwp);
 		}
 		
 		ResetFormation();
