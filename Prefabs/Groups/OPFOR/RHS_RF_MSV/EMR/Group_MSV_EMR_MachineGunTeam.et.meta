@@ -1,5 +1,5 @@
 MetaFileClass {
- Name "{AB905EF799E0A0AE}Prefabs/Groups/OPFOR/RHS_AFRF/MSV/Flora/Group_RHS_RF_MSV_Flora_FireGroup.et"
+ Name "{6B784A00E1045B7E}Prefabs/Groups/OPFOR/RHS_RF_MSV/EMR/Group_MSV_EMR_MachineGunTeam.et"
  Configurations {
   EntityTemplateResourceClass PC {
   }

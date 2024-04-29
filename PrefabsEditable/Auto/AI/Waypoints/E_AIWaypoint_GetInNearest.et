@@ -1,4 +1,4 @@
 SCR_BoardingWaypoint : "{B049D4C74FBC0C4D}Prefabs/AI/Waypoints/AIWaypoint_GetInNearest.et" {
  ID "568C71ECE1AF6020"
- CompletionRadius 8
+ CompletionRadius 10
 }
