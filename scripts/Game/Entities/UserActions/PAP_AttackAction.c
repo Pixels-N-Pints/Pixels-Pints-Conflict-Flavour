@@ -17,7 +17,7 @@ modded class DAD_AttackAction {
 		SCR_ChimeraCharacter owner = SCR_ChimeraCharacter.Cast(GetOwner());
 		SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(user);
 		if (!owner.GetFaction().IsFactionFriendly(player.GetFaction())) return false;
-		if (owner.GetID() == player.GetID()) return false;
+		if (owner.GetCharacterController().IsPlayerControlled()) return false;
 
 		return true;
 	}

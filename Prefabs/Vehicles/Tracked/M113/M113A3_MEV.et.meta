@@ -1,5 +1,5 @@
 MetaFileClass {
- Name "{ABCC1FF0D6096E47}Prefabs/Vehicles/Tracked/BFV/M2A2_BODY_BASE.et"
+ Name "{E80F269052FC0482}Prefabs/Vehicles/Tracked/M113/M113A3_MEV.et"
  Configurations {
   EntityTemplateResourceClass PC {
   }

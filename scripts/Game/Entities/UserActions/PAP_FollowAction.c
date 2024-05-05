@@ -18,23 +18,7 @@ modded class DAD_FollowAction {
 		SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(user);
 		
 		if (!owner.GetFaction().IsFactionFriendly(player.GetFaction())) return false;
-		if (owner.GetID() == player.GetID()) return false;
-		// TODO: fix
-		/*
-		switch (SCR_CharacterRankComponent.GetCharacterRank(user)) {
-			case SCR_ECharacterRank.CORPORAL:
-			case SCR_ECharacterRank.SERGEANT:
-			case SCR_ECharacterRank.LIEUTENANT:
-			case SCR_ECharacterRank.CAPTAIN:
-			case SCR_ECharacterRank.MAJOR:
-			case SCR_ECharacterRank.COLONEL: // Experimental ranks
-	  		case SCR_ECharacterRank.GENERAL: // *
-				return true;
-			default:
-				return false;
-				
-		}
-		*/
+		if (owner.GetCharacterController().IsPlayerControlled()) return false;
 		return true;
 	}
 

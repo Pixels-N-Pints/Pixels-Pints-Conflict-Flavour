@@ -178,18 +178,18 @@ modded class DAD_FollowComponent
 
 		Print("PAP_FollowComponent:Update() | Units are following");		
 
-		ref array<AIAgent> agents = {};
+		array<AIAgent> agents = {};
 		ai.GetAgents(agents);
 		
 		vector playerOrigin = m_User.GetOrigin();
 
-		if (m_User.IsInVehicle())
+		if (m_User.IsInVehicle() || m_User.IsInVehicleADS())
 		{
 			bool groupNeedsToGetInVehicle = false;
 			foreach (AIAgent a: agents)
 			{
 				ChimeraCharacter character = ChimeraCharacter.Cast(a.GetControlledEntity());
-				if (character && !character.IsInVehicle())
+				if (character && (!character.IsInVehicle() || !character.IsInVehicleADS()))
 				{
 					Print("PAP_FollowComponent:Update() | At least one follower not embarked!");
 					groupNeedsToGetInVehicle = true;
